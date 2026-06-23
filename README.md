@@ -1,78 +1,42 @@
 # AI Investment Research Agent
 
-You type in a company name. The agent researches it, writes up the business, growth, and risk picture, scores it out of 100, and gives you a clear **Invest** or **Pass** verdict. Every report is saved to your history and can be exported as a PDF.
+A small web app that does first-pass investment research on a company. You type a
+company name, it looks at the business, growth, and risk side of things, scores it
+out of 100, and tells you whether it's worth a closer look (Invest) or not (Pass).
+Every report is saved and can be downloaded as a PDF.
 
-The architecture follows my earlier project [MindTraits](https://github.com/srtanya-25/mindtraits): a React (Vite) frontend, a Django REST Framework backend, JWT stored in HTTP-only cookies, PostgreSQL in production, and Docker for local orchestration. This project keeps that shape and adds an AI layer for the actual research.
+I built this as a focused, explainable project rather than a kitchen-sink one. The
+goal was a clean end-to-end flow: auth, research, a score I can actually justify,
+and a verdict.
 
-## Features
+## What it does
 
-- Register / login with JWT in HTTP-only cookies (refresh handled automatically by an Axios interceptor)
-- Search any company by name and run a research pass
-- AI-generated business, growth, and risk analysis (LangChain + Gemini)
-- A transparent investment score (business + growth + risk, weighted) and an Invest/Pass verdict
-- Report history per user
-- One-click PDF export of any report
-- Works without an AI key too, using a deterministic offline analysis, so the app never hard-crashes on a missing or rate-limited key
+- Sign up / log in (JWT kept in HTTP-only cookies, refreshed automatically)
+- Search a company and run a research pass
+- Get three short writeups: business, growth, and risk
+- A 0-100 score and an Invest / Pass verdict
+- History of everything you've researched
+- Export any report to PDF
 
-## Architecture
+## How to run it
 
-```
-Browser (React + Vite)
-   |  axios, withCredentials (cookies)
-   v
-Django REST Framework  (/api/v1/*)
-   - accounts/   cookie JWT auth
-   - api/        thin views + URL aggregation
-   - research/   models, serializers, services, scoring (business logic)
-   - ai/         LangChain + Gemini client, prompts, parsers
-   |
-   v
-PostgreSQL
-```
-
-The request flow for one research run:
-
-```
-login -> search company -> POST /research/
-      -> ai.analyze_company()  (LangChain + Gemini, or offline fallback)
-      -> scoring.calculate_overall() + decide_verdict()
-      -> save ResearchReport + InvestmentScore
-      -> return report -> display scorecard -> export PDF
-```
-
-Business logic lives in `research/services.py` and `research/scoring.py`. Controllers (`api/views.py`) stay thin. AI logic is isolated in the `ai/` package so it never leaks into views.
-
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full breakdown and [docs/API.md](docs/API.md) for the endpoint reference.
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Frontend | React 19, Vite, Bootstrap 5 (CDN), Axios, React Query, Recharts, jsPDF |
-| Auth | JWT in HTTP-only cookies, Axios interceptor for auto-refresh |
-| Backend | Django 5, Django REST Framework |
-| AI | LangChain, Google Gemini 2.5 Flash |
-| Database | SQLite (dev), PostgreSQL (production) |
-| DevOps | Docker, Docker Compose, DockerHub, GitHub Actions, Nginx |
-| Deploy | Vercel (frontend), Render (backend + PostgreSQL) |
-
-## Setup
+You need Python 3.12+, Node 20+, and (optionally) a Gemini API key.
 
 ### Backend
 
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
+source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-cp .env.example .env              # then edit values
+cp .env.example .env            # fill in the values
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Backend runs at http://localhost:8000
+Runs on http://localhost:8000
 
 ### Frontend
 
@@ -83,103 +47,101 @@ cp .env.example .env
 npm run dev
 ```
 
-Frontend runs at http://localhost:5173
+Runs on http://localhost:5173
 
-## Environment Variables
+### Environment variables
 
 Backend (`backend/.env`):
 
-| Variable | Purpose |
-|---|---|
-| `SECRET_KEY` | Django secret key |
-| `DEBUG` | `True` for local dev, `False` in production |
-| `DATABASE_URL` | `sqlite:///db.sqlite3` locally, `postgresql://...` in production |
-| `FRONTEND_URL` | Allowed CORS origin for the frontend |
-| `GEMINI_API_KEY` | Google Gemini key. Leave blank to use the offline fallback |
-| `GEMINI_MODEL` | Defaults to `gemini-2.5-flash` |
+| Key | What it's for |
+|-----|----------------|
+| `SECRET_KEY` | Django secret |
+| `DEBUG` | `True` locally, `False` in production |
+| `DATABASE_URL` | `sqlite:///db.sqlite3` for dev, a Postgres URL in prod |
+| `FRONTEND_URL` | the frontend origin, for CORS |
+| `GEMINI_API_KEY` | your Gemini key. Leave it blank and the app still runs (see below) |
+| `GEMINI_MODEL` | defaults to `gemini-2.5-flash` |
 
 Frontend (`frontend/.env`):
 
-| Variable | Purpose |
-|---|---|
-| `VITE_API_URL` | Base URL of the backend (e.g. `http://localhost:8000`) |
+| Key | What it's for |
+|-----|----------------|
+| `VITE_API_URL` | base URL of the backend |
 
-## Database Setup
+One thing I did on purpose: if there's no Gemini key, the app doesn't crash. It
+falls back to a deterministic offline analysis so the whole flow still works for
+local dev and tests. With a key set, you get the real model output.
 
-`DATABASE_URL` drives the database choice. Locally it defaults to SQLite, so no setup is needed beyond `migrate`. In production it points at Render PostgreSQL. The schema is created from migrations:
+## How it works
 
-```bash
-python manage.py migrate
+The backend is Django REST Framework, the frontend is React (Vite). They talk over
+JSON, and auth tokens live in HTTP-only cookies so the frontend JS never touches
+them.
+
+The layering is intentionally boring so it's easy to follow:
+
+- views stay thin (read the request, call a service, return the result)
+- services hold the actual logic and orchestrate a research run
+- the scoring math is its own small module
+- anything to do with the model lives in one `ai/` package and nothing else imports it
+
+A research run goes:
+
+```
+company name -> ai layer (LangChain + Gemini) -> score -> verdict -> save -> show
 ```
 
-Tables added on top of the reused `auth_user`:
+The AI layer asks Gemini for a structured JSON response (sector, three analyses,
+and three sub-scores), and a parser pulls that apart. If the call fails for any
+reason the offline fallback kicks in.
 
-- `companies` - one row per researched company
-- `research_reports` - one research run, owned by a user
-- `investment_scores` - the numeric scorecard for a report
-- `saved_companies` - bookmarked companies
+More detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), and the endpoint list
+is in [docs/API.md](docs/API.md).
 
-## Docker Setup
+### How the score is calculated
 
-```bash
-docker compose up --build              # backend + frontend + postgres
-docker compose down -v                 # stop and wipe the DB volume
+```
+overall = business * 0.40 + growth * 0.35 + (100 - risk) * 0.25
+verdict = Invest if overall >= 60, else Pass
 ```
 
-- Frontend: http://localhost:5173 (nginx serving the built React app)
-- Backend: http://localhost:8000
-- Postgres: localhost:5433
+Risk is flipped because a riskier company should score lower. Everything is clamped
+to 0-100. I kept this as a plain rule rather than something learned so I can explain
+exactly why any company got the verdict it did.
 
-To run with a live AI key, export it before bringing the stack up:
+## Key decisions & trade-offs
 
-```bash
-export GEMINI_API_KEY=your-key
-docker compose up --build
-```
+- **One model call, not an agent loop.** A single structured prompt returns all
+  three analyses and the sub-scores. It's cheaper, faster, and much easier to reason
+  about than a multi-step agent.
+- **The score is a rule, not a model.** Transparent and tweakable. I'd rather defend
+  a clear weighting than a black box.
+- **Fallback instead of failure.** A missing or rate-limited key shouldn't take the
+  app down, so it degrades to offline output.
+- **No market data / vector search / portfolio features.** Out of scope for what
+  this is meant to show, and they'd add a lot of surface area for little gain here.
 
-## Deployment
+## Example runs
 
-- **Frontend** deploys to Vercel as a static Vite build. Set `VITE_API_URL` to the deployed backend URL.
-- **Backend** deploys to Render as a Python web service, using `backend/build.sh` for the build and gunicorn at runtime.
-- **PostgreSQL** is a managed Render instance; its connection string goes into `DATABASE_URL`.
-- **CI/CD**: pushing to `main` runs `.github/workflows/ci.yml`, which tests both apps, builds and pushes Docker images to DockerHub, then calls the Render deploy hooks.
+With a live key:
 
-## API Documentation
+- Infosys -> sector: IT Services, verdict Invest, score 69
+- Spotify -> sector: Digital Audio Streaming, verdict Invest
 
-Full reference in [docs/API.md](docs/API.md). All endpoints are under `/api/v1/`.
+Without a key (offline fallback, deterministic from the name):
 
-| Method | URL | Description | Auth |
-|---|---|---|---|
-| POST | `/register/` | Create account | Public |
-| POST | `/login/` | Sets HTTP-only cookies | Public |
-| POST | `/logout/` | Clears cookies | Yes |
-| POST | `/refresh/` | Refresh access token | Yes |
-| GET | `/me/` | Current user | Yes |
-| POST | `/research/` | Run research for a company | Yes |
-| GET | `/reports/` | Report history | Yes |
-| GET | `/reports/<id>/` | One full report | Yes |
-| GET | `/companies/?q=` | Search researched companies | Yes |
-| GET, POST, DELETE | `/saved/` | Saved companies | Yes |
+- Acme Corp -> Invest, score 64
+- Globex -> Pass, score 52
 
-## Example Runs
+## What I'd improve with more time
 
-With the offline fallback (no key), scores are derived deterministically from the company name, so these are reproducible:
+- Pull in real financials (revenue, margins) to ground the scores instead of relying
+  only on the model's read
+- Let the user adjust the weighting and watch the verdict change
+- Cache recent reports per company so I'm not re-calling the model for the same name
+- Alerts when a re-run flips a saved company's verdict
 
-- **Acme Corp** -> Business 71, Growth 64, Risk 48 -> Overall 64 -> **Invest**
-- **Globex** -> Business 58, Growth 49, Risk 61 -> Overall 52 -> **Pass**
+## Tech
 
-With a live Gemini key the analysis text and scores reflect the model's actual read of the company.
-
-## Trade-offs
-
-- **Single LLM call, not an agent loop.** One structured prompt returns all three analyses and the sub-scores. It is cheaper, faster, and far easier to explain than a multi-step agent. The assignment allowed LangGraph; I deliberately kept to a single LangChain call.
-- **Scoring is rule-based, not learned.** The weighting (business 40%, growth 35%, risk 25%) is a transparent business rule. It is easy to defend in an interview and easy to tweak.
-- **Offline fallback over hard failure.** A missing or rate-limited key falls back to deterministic output instead of erroring, so demos and CI never break.
-- **No vector DB / RAG / real-time market data.** Out of scope for a 7-day build and not needed for the verdict logic.
-
-## Future Improvements
-
-- Pull in real financial data (revenue, margins) to ground the scores
-- Let users adjust the score weighting and see the verdict change live
-- Cache recent reports per company to avoid duplicate AI calls
-- Add saved-company alerts when a re-run changes the verdict
+React (Vite), Django REST Framework, PostgreSQL, LangChain + Gemini, JWT cookies,
+Docker, GitHub Actions, deployed on Vercel (frontend) and Render (backend + db).
