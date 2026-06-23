@@ -49,5 +49,5 @@ def analyze_company(company_name):
     try:
         return _run_gemini(company_name)
     except Exception as exc:  # network, quota, parse - never break the request
-        logger.warning("Gemini call failed (%s) - using offline fallback.", exc)
+        logger.warning("Gemini call failed (%s) - using offline fallback.", exc, exc_info=True)
         return fallback_research(company_name)

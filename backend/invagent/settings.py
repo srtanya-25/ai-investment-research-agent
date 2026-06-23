@@ -144,3 +144,15 @@ SESSION_COOKIE_HTTPONLY = True
 # deterministic analysis so local runs and CI never depend on a live key.
 GEMINI_API_KEY = config("GEMINI_API_KEY", default="")
 GEMINI_MODEL   = config("GEMINI_MODEL", default="gemini-2.5-flash")
+
+# Send our own app logs to the console so they show up in the host's log stream.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "loggers": {
+        "ai": {"handlers": ["console"], "level": "INFO"},
+    },
+}
