@@ -1,0 +1,39 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      SECRET_KEY: dev-secret-key-not-for-production
+      DEBUG: "True"
+      DATABASE_URL: postgresql://invagent_user:invagent_pass@db:5432/invagent_db
+      FRONTEND_URL: http://localhost:5173
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: gemini-2.5-flash
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8000
+    ports:
+      - "5173:80"        # nginx serves on 80 inside the container
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:16
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: invagent_db
+      POSTGRES_USER: invagent_user
+      POSTGRES_PASSWORD: invagent_pass
+    ports:
+      - "5433:5432"
+
+volumes:
+  postgres_data:

@@ -1,0 +1,60 @@
+/* -----------------------------------------------------------------
+   Investment Research Agent - global stylesheet
+   Bootstrap utility classes do most of the work; custom classes
+   only where Bootstrap falls short.
+   ----------------------------------------------------------------- */
+
+body {
+    background-color: #25292c;
+    color: #f0f0f0;
+}
+
+/* Dark variant of bg-light from bootstrap */
+.bg-light-dark {
+    background-color: #2e3235;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    flex: 1;
+}
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    color: #8a9197;
+}
+
+/* History cards lift slightly on hover */
+.report-card {
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.report-card:hover {
+    transform: translateY(-2px);
+    background-color: #353a3e;
+}
+
+/* Verdict badges */
+.badge-invest,
+.badge-pass {
+    padding: 4px 12px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-invest {
+    background-color: #1e4620;
+    color: #6bd97a;
+}
+
+.badge-pass {
+    background-color: #4a1f1f;
+    color: #e57373;
+}

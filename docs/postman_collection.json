@@ -1,0 +1,60 @@
+{
+  "info": {
+    "name": "AI Investment Research Agent",
+    "description": "Manual API checks. Set baseUrl to your backend, e.g. http://localhost:8000",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" }
+  ],
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/v1/register/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"demo\",\n  \"email\": \"demo@example.com\",\n  \"password\": \"strongpass1\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/v1/login/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"demo\",\n  \"password\": \"strongpass1\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Run Research",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/v1/research/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"company_name\": \"Tesla\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Report History",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/reports/" }
+    },
+    {
+      "name": "Report Detail",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/reports/1/" }
+    },
+    {
+      "name": "Search Companies",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/companies/?q=tesla" }
+    }
+  ]
+}
