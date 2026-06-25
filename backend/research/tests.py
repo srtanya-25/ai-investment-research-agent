@@ -57,3 +57,15 @@ class ResearchEndpointTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertIn("verdict", response.data)
         self.assertIn("score", response.data)
+
+    def test_user_can_delete_own_report(self):
+        created = self.client.post(
+            "/api/v1/research/", {"company_name": "Initech"}, format="json"
+        )
+        report_id = created.data["id"]
+
+        deleted = self.client.delete(f"/api/v1/reports/{report_id}/")
+        self.assertEqual(deleted.status_code, 204)
+
+        missing = self.client.get(f"/api/v1/reports/{report_id}/")
+        self.assertEqual(missing.status_code, 404)

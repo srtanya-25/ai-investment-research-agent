@@ -63,8 +63,8 @@ class ReportListView(generics.ListAPIView):
         )
 
 
-class ReportDetailView(generics.RetrieveAPIView):
-    """GET /api/v1/reports/<id>/ - one full report owned by the user."""
+class ReportDetailView(generics.RetrieveDestroyAPIView):
+    """GET / DELETE /api/v1/reports/<id>/ - one full report owned by the user."""
     serializer_class = ResearchReportSerializer
     permission_classes = [IsAuthenticated]
 

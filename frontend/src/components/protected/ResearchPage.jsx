@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../axiosInstance'
 
@@ -7,8 +7,21 @@ const ResearchPage = () => {
     const [companyName, setCompanyName] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
+    const [elapsed, setElapsed] = useState(0)
+    const timerRef = useRef(null)
 
     const navigate = useNavigate()
+
+    // Count seconds while a research request is in flight so the user knows it is working
+    useEffect(() => {
+        if (loading) {
+            setElapsed(0)
+            timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000)
+        } else {
+            clearInterval(timerRef.current)
+        }
+        return () => clearInterval(timerRef.current)
+    }, [loading])
 
     const handleResearch = async (e) => {
         e.preventDefault()
@@ -52,9 +65,16 @@ const ResearchPage = () => {
                             className="btn btn-info btn-lg"
                             disabled={loading || !companyName.trim()}
                         >
-                            {loading ? "Researching..." : "Run Research"}
+                            {loading ? `Researching... ${elapsed}s` : "Run Research"}
                         </button>
                     </form>
+
+                    {loading && (
+                        <p className="text-light small mt-3 mb-0">
+                            Analysing the company. This usually takes 10 to 20 seconds
+                            (a little longer on the first request after the server has been idle).
+                        </p>
+                    )}
 
                     {error && <div className="text-danger mt-3">{error}</div>}
                 </div>

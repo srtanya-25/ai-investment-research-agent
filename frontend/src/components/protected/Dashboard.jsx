@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axiosInstance from '../../axiosInstance'
 
 // Report history. React Query handles the fetch, caching, and loading state.
@@ -9,10 +9,27 @@ const fetchReports = async () => {
 }
 
 const Dashboard = () => {
+    const queryClient = useQueryClient()
+
     const { data: reports, isLoading, isError } = useQuery({
         queryKey: ['reports'],
         queryFn: fetchReports,
     })
+
+    // Delete a report, then refresh the list from the server
+    const deleteReport = useMutation({
+        mutationFn: (id) => axiosInstance.delete(`/reports/${id}/`),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['reports'] }),
+    })
+
+    const handleDelete = (e, id, name) => {
+        // The card is wrapped in a link, so stop the click from opening the report
+        e.preventDefault()
+        e.stopPropagation()
+        if (window.confirm(`Delete the research report for ${name}?`)) {
+            deleteReport.mutate(id)
+        }
+    }
 
     if (isLoading) {
         return <div className="text-light text-center p-5">Loading your reports...</div>
@@ -58,9 +75,18 @@ const Dashboard = () => {
                                 <p className="text-light small mt-2 mb-0">
                                     Score: {report.overall_score}/100
                                 </p>
-                                <p className="text-muted small mb-0">
-                                    {new Date(report.created_at).toLocaleDateString()}
-                                </p>
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <p className="text-muted small mb-0">
+                                        {new Date(report.created_at).toLocaleDateString()}
+                                    </p>
+                                    <button
+                                        className="btn btn-sm btn-outline-danger"
+                                        onClick={(e) => handleDelete(e, report.id, report.company.name)}
+                                        disabled={deleteReport.isPending}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
                         </Link>
                     </div>
