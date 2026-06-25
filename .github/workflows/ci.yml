@@ -114,8 +114,7 @@ jobs:
     needs: [build-push]
 
     steps:
+      # Backend redeploys via its Render hook. The frontend auto-deploys on
+      # Vercel when main updates, so it does not need a step here.
       - name: Deploy backend to Render
         run: curl -X POST ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}
-
-      - name: Deploy frontend to Render
-        run: curl -X POST ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}
