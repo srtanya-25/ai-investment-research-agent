@@ -39,7 +39,7 @@ const ReportView = () => {
         { name: 'Growth', value: score.growth_score },
         { name: 'Risk', value: score.risk_score },
     ]
-    const barColors = ['#17a2b8', '#28a745', '#dc3545']
+    const barColors = ['#17a2b8', '#28a745', '#dc7a45']
 
     return (
         <div className="container py-4">
