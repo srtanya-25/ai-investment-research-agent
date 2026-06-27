@@ -8,7 +8,8 @@ const AuthProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [loading, setLoading] = useState(true)
 
-    // On app load, ask the backend if our HTTP-only cookie is still valid
+    // Check the cookie in the background. The app renders straight away so the
+    // landing page shows instantly instead of waiting on the backend to wake up.
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -23,12 +24,8 @@ const AuthProvider = ({ children }) => {
         checkAuth()
     }, [])
 
-    if (loading) {
-        return <div className="text-light text-center p-5">Loading...</div>
-    }
-
     return (
-        <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+        <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, loading }}>
             {children}
         </AuthContext.Provider>
     )
