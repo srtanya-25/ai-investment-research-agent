@@ -6,7 +6,6 @@ score out of 100, and gives a clear Invest or Pass verdict. Every report is save
 can be exported as a PDF.
 
 **Live app:** https://ai-investment-research-agent-sandy.vercel.app
-**API:** https://invagent-backend.onrender.com
 **Demo login:** `demo` / `strongpass1`
 
 ## Overview
@@ -104,8 +103,9 @@ sub-scores), and a parser pulls it apart. If the call fails for any reason, the 
 fallback takes over so the request never breaks.
 
 More detail is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), the endpoints are listed
-in [docs/API.md](docs/API.md), and the problems faced during the build are written up in
-[docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md).
+in [docs/API.md](docs/API.md), the problems faced during the build are written up in
+[docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md), and the AI tool sessions are in
+[docs/screenshots](docs/screenshots).
 
 ### How the score is calculated
 

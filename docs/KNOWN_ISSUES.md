@@ -35,14 +35,5 @@ A few pushes failed with a certificate error, again due to the security software
 
 ## AI session screenshots
 
-A few of the questions asked while building, kept as a record of the approach.
-
-![Writing the Django service that calls Gemini with a fallback](screenshots/gemini-service.png)
-
-![Debugging the Render database engine error](screenshots/render-db-engine.png)
-
-![Understanding CORS between the frontend and backend](screenshots/cors.png)
-
-![Understanding JWT login with cookies](screenshots/jwt-cookies.png)
-
-![Fixing the Vite browserslist crash](screenshots/vite-browserslist.png)
+A few of the questions asked while building are collected here:
+[docs/screenshots](screenshots/).
