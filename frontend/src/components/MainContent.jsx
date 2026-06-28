@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom"
 import { useContext } from "react"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faBuilding, faChartColumn, faFileLines, faChevronDown } from "@fortawesome/free-solid-svg-icons"
 import { AuthContext } from "../AuthProvider"
 
 // Landing page shown at "/"
@@ -10,55 +12,60 @@ const MainContent = () => {
         <div className="container py-5">
             <div className="row justify-content-center">
                 <div className="col-md-8 text-center">
-                    <h1 className="text-light mb-3">
-                        Research Any Company <span className="text-info">in Seconds</span>
-                    </h1>
+                    <h1 className="text-light mb-3">Research any company</h1>
                     <p className="text-light mb-4">
-                        Type in a company name and the agent reviews its{" "}
-                        <strong>business fundamentals, growth outlook, and risks</strong>,
-                        turns them into an investment score, and gives you a clear
-                        Invest or Pass verdict you can export as a PDF.
+                        Turn a company's <strong>business, growth, and risk</strong> into a
+                        score and a clear Invest or Pass verdict you can export as a PDF.
                     </p>
 
-                    <div className="row mt-5 text-start">
-                        <div className="col-md-4 mb-3">
-                            <div className="bg-light-dark p-3 rounded h-100">
-                                <h5 className="text-info">Business & Growth</h5>
-                                <p className="text-light small mb-0">
-                                    A short read on what the company does, its strengths,
-                                    and where its growth could come from.
-                                </p>
-                            </div>
-                        </div>
-                        <div className="col-md-4 mb-3">
-                            <div className="bg-light-dark p-3 rounded h-100">
-                                <h5 className="text-info">Investment Score</h5>
-                                <p className="text-light small mb-0">
-                                    Business, growth, and risk are combined into one
-                                    score out of 100 with a transparent weighting.
-                                </p>
-                            </div>
-                        </div>
-                        <div className="col-md-4 mb-3">
-                            <div className="bg-light-dark p-3 rounded h-100">
-                                <h5 className="text-info">Verdict & Export</h5>
-                                <p className="text-light small mb-0">
-                                    Get an Invest or Pass call, keep a history of past
-                                    reports, and download any report as a PDF.
-                                </p>
-                            </div>
-                        </div>
+                    {/* Each feature is a plain HTML details element, so it expands on its own */}
+                    <div className="feature-accordion">
+                        <details className="feature-item" open>
+                            <summary>
+                                <FontAwesomeIcon icon={faBuilding} className="feature-icon" />
+                                <span className="feature-title">Business and growth</span>
+                                <FontAwesomeIcon icon={faChevronDown} className="feature-chevron" />
+                            </summary>
+                            <p className="feature-text">
+                                A short read on what the company does, its strengths, and where
+                                its growth could come from.
+                            </p>
+                        </details>
+
+                        <details className="feature-item">
+                            <summary>
+                                <FontAwesomeIcon icon={faChartColumn} className="feature-icon feature-icon-green" />
+                                <span className="feature-title">Investment score</span>
+                                <FontAwesomeIcon icon={faChevronDown} className="feature-chevron" />
+                            </summary>
+                            <p className="feature-text">
+                                Business, growth, and risk are combined into one score out of 100
+                                with a transparent weighting.
+                            </p>
+                        </details>
+
+                        <details className="feature-item">
+                            <summary>
+                                <FontAwesomeIcon icon={faFileLines} className="feature-icon feature-icon-amber" />
+                                <span className="feature-title">Verdict and export</span>
+                                <FontAwesomeIcon icon={faChevronDown} className="feature-chevron" />
+                            </summary>
+                            <p className="feature-text">
+                                Get an Invest or Pass call, keep a history of past reports, and
+                                download any report as a PDF.
+                            </p>
+                        </details>
                     </div>
 
                     <div className="mt-4">
                         {isLoggedIn ? (
                             <Link to="/research">
-                                <button className="btn btn-info btn-lg">Start Researching</button>
+                                <button className="btn btn-info btn-lg">Start researching</button>
                             </Link>
                         ) : (
                             <>
                                 <Link to="/register">
-                                    <button className="btn btn-info btn-lg me-2">Get Started</button>
+                                    <button className="btn btn-info btn-lg me-2">Get started</button>
                                 </Link>
                                 <Link to="/login">
                                     <button className="btn btn-outline-light btn-lg">Login</button>

@@ -70,6 +70,65 @@ footer {
     border-radius: 9px;
 }
 
+/* Landing page feature accordion (built on the HTML details element) */
+.feature-accordion {
+    max-width: 540px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.feature-item {
+    background-color: #2e3235;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 11px;
+    margin-bottom: 10px;
+}
+
+.feature-item summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 13px 15px;
+    color: #f0f0f0;
+    font-weight: 500;
+}
+
+.feature-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.feature-icon {
+    color: #17a2b8;
+    margin-right: 10px;
+}
+
+.feature-icon-green {
+    color: #28a745;
+}
+
+.feature-icon-amber {
+    color: #e0b34d;
+}
+
+.feature-chevron {
+    margin-left: auto;
+    color: #9aa3ab;
+    transition: transform 0.2s ease;
+}
+
+.feature-item[open] .feature-chevron {
+    transform: rotate(180deg);
+}
+
+.feature-text {
+    padding: 0 15px 14px 41px;
+    font-size: 0.85rem;
+    color: #b9bfc4;
+    line-height: 1.6;
+    margin: 0;
+}
+
 /* History cards lift slightly on hover */
 .report-card {
     transition: transform 0.15s ease, background-color 0.15s ease;
