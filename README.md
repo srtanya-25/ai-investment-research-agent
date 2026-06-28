@@ -5,6 +5,7 @@ company name and the app reviews its business, growth, and risk, turns that into
 score out of 100, and gives a clear Invest or Pass verdict. Every report is saved and
 can be exported as a PDF.
 
+The full source code is available on GitHub: https://github.com/srtanya-25/ai-investment-research-agent
 **Live app:** https://ai-investment-research-agent-sandy.vercel.app
 **Demo login:** `demo` / `strongpass1`
 
